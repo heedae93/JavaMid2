@@ -10,6 +10,11 @@ public class ComplexBox<T extends Animal> {
         this.animal = animal;
     }
 
+    /**
+     * 클래스 레벨의 제네릭 타입보다 제네릭 메서드가 우선순위를 가진다.
+     * 아래의 T타입은 클래스 생성시 전달한 타입과는 상관없이 메서드를 호출 할 때 받는 파라미터 타입으로
+     * 결졍된다.
+     */
     public <T> T printAndReturn(T t) {
         System.out.println("animal.className: " + animal.getClass().getName());
         System.out.println("t.className: " + t.getClass().getName());
