@@ -83,3 +83,97 @@ public class ArrayMain1 {
 ![img.png](img/bigO.png)
 
 # [ 배열에 데이터 추가 ]
+
+- 배열에 새로운 데이터를 추가할려면 먼저 공간을 확보해야 한다.
+- 따라서 경우에 따라서 기존 데이터를 오른쪽으로 한칸씩 밀어내야 한다.
+- 배열에 데이터를 추가하는 경우는 크게 3가지로 구분할 수 있다.
+    - 배열의 첫번째 위치에 추가하는 경우
+      - 기존 데이터를 모두 오른쪽으로 한칸씩 이동해야 한다
+      - 배열의 마지막 부분부터 한칸씩 오른쪽으로 이동하게 된다.
+      - 이동 후 확보된 공간에 데이터가 추가된다.
+    - 배열의 중간에 추가하는 경우
+      - 추가하고자 하는 인덱스부터 시작해서 한칸씩 오른쪽으로 이동하게 된다.
+      - 이 경우 인덱스 왼쪽의 데이터는 움직이지 않는다.
+      - 이렇게 확보된 공간에 데이터를 추가한다.
+    - 배열의 마지막에 추가하는 경우
+      - 이 경우는 기존 데이터를 이동하지 않고 바로 값이 추가 된다.
+
+### 배열에 데이터를 추가할 때 위치에 따른 성능 변화
+
+- 배열의 첫번째 위치에 추가
+  - 배열의 첫번째 위치를 찾는데는 인덱스를 사용하므로 O(1)이 걸린다.
+  모든 데이터를 배열의 크기만큼 한 칸씩 이동해야 한다. 따라서 O(n) 만큼의 연산이 걸린다.
+  O(1 + n) O(n)이 된다.
+- 배열의 중간 위치에 추가
+  - 배열의 위치를 찾는데는 O(1)이 걸린다.
+  index의 오른쪽에 있는 데이터를 모두 한 칸씩 이동해야 한다. 따라서 평균 연산은 O(n/2)이 된다.
+  O(1 + n/2) O(n)이 된다.
+- 배열의 마지막 위치에 추가
+  - 이 경우 배열이 이동하지 않고 배열의 길이를 사용하면 마지막 인덱스에 바로 접근할 수 있으므로 한번의 계
+  산으로 위치를 찾을 수 있고, 기존 배열을 이동하지 않으므로 O(1)이 된다.
+
+```java
+package collection.array;
+
+import java.util.Arrays;
+
+/**
+ * 배열의 특징
+ */
+public class ArrayMain2 {
+
+    public static void main(String[] args) {
+        int[] arr = new int[5];
+        arr[0] = 1;
+        arr[1] = 2;
+        System.out.println(Arrays.toString(arr));
+
+        //배열의 첫번째 위치에 추가
+        //기본 배열의 데이터를 한 칸씩 뒤로 밀고 배열의 첫번째 위치에 추가
+        System.out.println("배열의 첫번째 위치에 3 추가 O(n)");
+        int newValue = 3;
+        addFirst(arr, newValue);
+        System.out.println(Arrays.toString(arr));
+
+        //index 위치에 추가
+        //기본 배열의 데이터를 한 칸씩 뒤로 밀고 배열의 index 위치에 추가
+        System.out.println("배열의 index(2) 위치에 4 추가 O(n)");
+        int index = 2;
+        int value = 4;
+        addAtIndex(arr, index, value);
+        System.out.println(Arrays.toString(arr));
+
+        System.out.println("배열의 마지막 위치에 5 추가 O(1)");
+        addLast(arr, 5);
+        System.out.println(Arrays.toString(arr));
+    }
+
+    private static void addLast(int[] arr, int newValue) {
+        arr[arr.length - 1] = newValue;
+    }
+
+    private static void addFirst(int[] arr, int newValue) {
+        for (int i = arr.length - 1; i > 0; i--) {
+            arr[i] = arr[i - 1];
+        }
+        arr[0] = newValue;
+    }
+
+    private static void addAtIndex(int[] arr, int index, int value) {
+        for (int i = arr.length - 1; i > index; i--) {
+            arr[i] = arr[i - 1];
+        }
+        arr[index] = value;
+    }
+}
+```
+
+### 배열의 한계
+- 배열은 가장 기본적인 자료 구조이고, 특히 인덱스를 활용할 때 최고 효율이 나온다.
+- 하지만 생성 시점에 크기를 미리 정해야 하는 단점이 있다.
+- 미리 엄청 큰 배열을 선언할 수도 있지만 이렇게 되면 사용하지 않는 메모리 공간을
+낭비하게 된다.
+- 따라서 언제든 동적으로 크기를 늘리고 줄일 수 있는 자료 구조가 필요한데
+그것이 컬렉션 프레임 워크가 존재하는 이유다.
+
+# [ ArrayList ( 배열 리스트 )]
