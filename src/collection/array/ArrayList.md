@@ -656,3 +656,168 @@ at collection.array.MyArrayListV3BadMain.main(MyArrayListV3BadMain.java:19)
 - 위의 문제 때문에 ArrayList는 제네릭을 지원한다.
 
 ### MyArrayList4
+- 앞서 만든 `MyArrayList` 들은 `Object` 를 입력받기 때문에 아무 데이터나 입력할 수 있고, 또 결과로 `Object` 를 반
+  환한다. 
+- 따라서 필요한 경우 다운 캐스팅을 해야하고, 또 타입 안전성이 떨어지는 단점이 있다.
+- 제네릭을 도입하면 타입 안전성을 확보하면서 이런 문제를 한번에 해결할 수 있다.
+
+```java
+package collection.array;
+
+import java.util.Arrays;
+
+public class MyArrayListV4<E> {
+
+    private static final int DEFAULT_CAPACITY = 5;
+
+    private Object[] elementData;
+    private int size = 0;
+
+    public MyArrayListV4() {
+        elementData = new Object[DEFAULT_CAPACITY];
+    }
+
+    public MyArrayListV4(int initialCapacity) {
+        elementData = new Object[initialCapacity];
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public void add(E e) {
+        if (size == elementData.length) {
+            grow();
+        }
+        elementData[size] = e;
+        size++;
+    }
+
+    public void add(int index, E e) {
+        if (size == elementData.length) {
+            grow();
+        }
+        shiftRightFrom(index);
+        elementData[index] = e;
+        size++;
+    }
+
+    //요소의 마지막부터 index까지 오른쪽으로 밀기
+    private void shiftRightFrom(int index) {
+        for (int i = size; i > index; i--) {
+            elementData[i] = elementData[i - 1];
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    // 애초에 add메서드에서 지정된 타입의 데이터만 들어오기 때문에
+    // 다운캐스팅시에도 아무런 문제가 없다.
+    public E get(int index) {
+        return (E) elementData[index];
+    }
+
+    public E set(int index, E element) {
+        E oldValue = get(index);
+        elementData[index] = element;
+        return oldValue;
+    }
+
+    public E remove(int index) {
+        E oldValue = get(index);
+        shiftLeftFrom(index);
+
+        size--;
+        elementData[size] = null;
+        return oldValue;
+    }
+
+    //요소의 index부터 마지막까지 왼쪽으로 밀기
+    private void shiftLeftFrom(int index) {
+        for (int i = index; i < size - 1; i++) {
+            elementData[i] = elementData[i + 1];
+        }
+    }
+
+    public int indexOf(E o) {
+        for (int i = 0; i < size; i++) {
+            if (o.equals(elementData[i])) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void grow() {
+        int oldCapacity = elementData.length;
+        int newCapacity = oldCapacity * 2;
+        elementData = Arrays.copyOf(elementData, newCapacity);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(Arrays.copyOf(elementData, size)) + " size=" + size + ", capacity=" + elementData.length;
+    }
+
+}
+```
+
+- 위 클래스를 사용해 보자
+
+```java
+package collection.array;
+
+public class MyArrayListV4Main {
+
+    public static void main(String[] args) {
+        MyArrayListV4<String> stringList = new MyArrayListV4<>();
+        stringList.add("a");
+        stringList.add("b");
+        stringList.add("c");
+        String string = stringList.get(0);
+        System.out.println("string = " + string);
+        
+        MyArrayListV4<Integer> intList = new MyArrayListV4<>();
+        intList.add(1);
+        intList.add(2);
+        intList.add(3);
+        Integer integer = intList.get(0);
+        System.out.println("integer = " + integer);
+    }
+}
+
+
+// 실행 결과
+string = a
+integer = 1
+```
+
+- 제네릭을 사용한 덕분에 타입 인자로 지정한 타입으로만 안전하게 데이터를 저장하고, 조회할 수 있게 되었다.
+- 제네릭의 도움으로 타입 안전성이 높은 자료 구조를 만들 수 있다.
+
+### 제네릭 ArrayList에서 내부 배열에 Object 타입을 사용하는 이유
+
+- 생성자를 보면 생성시 new 키워드를 통해서 배열을 생성한다.
+- 근데 여기서 new E 처럼 타입 매개변수로 배열 생성이 불가능하다.
+- 그 이유는 제네릭은 런타임에 이레이저에 의해 타입 정보가 사라지기 때문이다.
+```java
+// 컴파일 전 (제네릭 코드):
+List<String> stringList = new ArrayList<>();
+stringList.add("Hello");
+
+// 컴파일 후 (바이트코드, 런타임에 실행되는 형태):
+List stringList = new ArrayList();
+stringList.add("Hello"); // String이 아닌 Object 타입으로 처리됨
+```
+
+
+### ArrayList의 단점
+
+- 정확한 크기를 미리 알지 못하면 메모리가 낭비된다. 배열을 사용하므로 배열 뒷 부분에 사용되지 않고, 낭비되는
+  메모리가 있다.
+-   데이터를 중간에 추가하거나 삭제할 때 비효율적이다.
+  이 경우 데이터를 한 칸씩 밀어야 한다. 이것은 O(n)으로 성능이 좋지 않다.
+  만약 데이터의 크기가 1,000,000건이라면 최악의 경우 데이터를 추가할 때 마다 1,000,000건의 데이터를
+  밀어야 한다.
+- 배열 리스트는 순서대로 마지막에 데이터를 추가하거나 삭제할 때는 성능이 좋지만, 앞이나 중간에 데이터를 추가하거
+  나 삭제할 때는 성능이 좋지 않다. 
+- 이러한 단점을 해결한 자료 구조가 LinkedList다.
