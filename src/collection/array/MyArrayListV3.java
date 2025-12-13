@@ -72,6 +72,23 @@ public class MyArrayListV3 {
         return oldValue;
     }
 
+    // 코드 추가
+    // remove는 인덱스 말고 값을 전달하여 삭제하는 기능도 있는데 만약 숫자를 삭제 하고 싶어서 숫자를 전달하면
+    // 인덱스로 인식된다. 따라서 remove ( Integer.valueOf(1) ) 로 삭제를 하면 아래 메서드 호출되어 값이 삭제 된다.
+    public boolean remove(Object o) {
+        int index = indexOf(o); // 1. 객체의 인덱스를 찾는다.
+
+        if (index == -1) {
+            return false; // 해당 객체를 찾지 못함
+        }
+
+        // 2. 찾은 인덱스를 사용하여 요소를 삭제한다.
+        remove(index); // 이 메서드는 shiftLeftFrom, size--, null 처리를 모두 수행함
+
+        // 3. 삭제에 성공했으므로 true 반환
+        return true;
+    }
+
     //코드 추가, 요소의 index부터 마지막까지 왼쪽으로 밀기
     private void shiftLeftFrom(int index) {
         for (int i = index; i < size - 1; i++) {
