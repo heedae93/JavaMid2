@@ -9,16 +9,6 @@ public class Node {
         this.item = item;
     }
 
-/*
-    //IDE 생성 toString()
-    @Override
-    public String toString() {
-        return "Node{" +
-                "item=" + item +
-                ", next=" + next +
-                '}';
-    }
-*/
 
     @Override
     public String toString() {
