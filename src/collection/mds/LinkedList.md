@@ -42,7 +42,7 @@ public class Node {
 ```
 - A라는 값을 넣은 노드와 B라는 값을 넣은 노드를 만들고 A의 next에 B의 참조값을 넣으면 아래와 같이 노드끼리 연결된다.
 - 아래와 같이 연결되었으니 첫 번째 노드의 `node.next` 를 호출하면 두 번째 노드를 구할 수 있게 되는 것
-![img.png](img/node.png)
+![img.png](../link/img/node.png)
 
 - 노드를 아래와 같이 코드로 연결할 수 있다.
 ```java
@@ -265,19 +265,19 @@ public class MyLinkedListV1 {
 ### 첫 번째 위치에 데이터 추가
 1.신규 노드 생성
 
-![img.png](img/1.png)
+![img.png](../link/img/1.png)
 
 2. 신규 노드와 다음 노드 연결
 
-![img.png](img/2.png)
+![img.png](../link/img/2.png)
 
 3.first에 신규 노드 연결
 
-![img.png](img/3.png)
+![img.png](../link/img/3.png)
 
 4. 최종 결과
 
-![img.png](img/5.png)
+![img.png](../link/img/5.png)
 
 - 배열의 경우 첫 번째 항목에 데이터가 추가되면 모든 데이터를 오른쪽으로 하나씩 밀어야 하지만 연결 리스트는
 새로 생성한 노드의 참조만 변경하면 된다. 
@@ -287,13 +287,13 @@ public class MyLinkedListV1 {
 ### 첫 번째 위치의 데이터 삭제
 
 1. 삭제 대상 선택
-![img.png](img/6.png)
+![img.png](../link/img/6.png)
 2. first에 삭제 대상의 다음 노드 연결
-![img.png](img/7.png)
+![img.png](../link/img/7.png)
 3. 삭제 대상의 데이터 초기화
-![img.png](img/8.png)
+![img.png](../link/img/8.png)
 4. 최종 결과
-![img.png](img/9.png)
+![img.png](../link/img/9.png)
 - 노드를 삭제했으므로 오른쪽 노드의 index가 하나씩 당겨진다.
 - 배열의 경우 첫 번째 항목이 삭제되면 모든 데이터를 왼쪽으로 하나씩 밀어야 하지만 연결 리스트는 일부 참조만
    변경하면 된다. 
@@ -304,16 +304,16 @@ public class MyLinkedListV1 {
 - `[a->b->c]` 로 만들어진 노드의 1번 인덱스 위치에 `e` 를 추가해서 `[a->e->b->c]` 로 변경한다고 가정한다.
 1. 새로운 노드를 생성하고, 노드가 입력될 위치의 직전 노드(prev)를 찾아둔다.
 
-![img.png](img/10.png)
+![img.png](../link/img/10.png)
 2. 신규 노드와 다음 노드를 연결한다. 직전 노드(prev)의 다음 노드를 연결하면 된다.
 
-![img.png](img/11.png)
+![img.png](../link/img/11.png)
 3. 직전 노드(prev)에 신규 노드를 연결한다.
 
-![img.png](img/13.png)
+![img.png](../link/img/13.png)
 4. 최종 결과
 
-![img.png](img/14.png)
+![img.png](../link/img/14.png)
 
 - 노드를 추가했으므로 추가한 노드 오른쪽에 있는 노드들의 index가 하나씩 뒤로 밀려난다.
 - 배열의 경우 데이터가 추가되면 인덱스 위치 부터 모든 데이터를 오른쪽으로 하나씩 밀어야 하지만 연결 리스트는
@@ -326,18 +326,18 @@ public class MyLinkedListV1 {
 ### 중간 위치의 데이터 삭제
 1. 삭제 대상을 찾는다. 그리고 삭제 대상의 직전 노드(prev)도 찾아둔다.
 
-![img.png](img/15.png)
+![img.png](../link/img/15.png)
 2. 직전 노드(prev)의 다음 노드를 삭제 노드의 다음 노드와 연결한다.
 
-![img.png](img/img.png)
+![img.png](../link/img/img.png)
 3. 삭제 노드의 데이터를 초기화 한다.
 
-![img_1.png](img/img_1.png)
+![img_1.png](../link/img/img_1.png)
 
 - 더는 삭제 노드를 참조하는 곳이 없다. 삭제 노드는 이후 GC의 대상이 되어서 제거된다.
 4. 최종 결과
 
-![img_2.png](img/img_2.png)
+![img_2.png](../link/img/img_2.png)
 
 - 노드를 삭제했으므로 오른쪽 노드의 index가 하나씩 당겨진다.
 - 연결 리스트에서 인덱스로 삭제할 항목을 찾는데 O(n)이 걸린다.

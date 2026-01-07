@@ -35,7 +35,7 @@ public class ArrayMain1 {
     }
 }
 ```
-![img.png](img/img.png)
+![img.png](../array/img/img.png)
 
 ### 배열의 검색
 - 배열에 들어 있는 데이터를 찾는 것을 검색이라고 한다.
@@ -80,7 +80,7 @@ public class ArrayMain1 {
   - **O(n log n)** - 선형 로그 시간:
   예) 많은 효율적인 정렬 알고리즘들
 
-![img.png](img/bigO.png)
+![img.png](../array/img/bigO.png)
 
 # [ 배열에 데이터 추가 ]
 
