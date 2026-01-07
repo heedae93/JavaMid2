@@ -525,7 +525,8 @@ MyLinkedListV2{first=[a->b->c], size=3}
 # [ 제네릭 도입 ]
 
 - 지금까지 만든 연결 리스트에 제네릭을 도입해서 타입 안전성을 높여보자.
-
+- 참고로 아래 코드를 보면 클래스 안에 클래스가 선언되어 있는데 이를 중첩 클래스라고 한다.
+- 중첩 클래스는 특정 클래스 안에서만 사용될 때 주로 사용하며 아래의 경우 외부에 Node클래스가 존재하지만 내부에 Node클래스가 똑같이 있기 때문에 내부의 Node 클래스를 사용하게 된다.
 ```java
 
 package collection.link;
@@ -647,5 +648,28 @@ public class MyLinkedListV3<E> {
             return sb.toString();
         }
     }
+}
+```
+
+- 위 클래스를 사용 해 보자.
+
+```java
+public class MyLinkedListV3Main {
+    public static void main(String[] args) {
+        MyLinkedListV3<String> stringList = new MyLinkedListV3<>();
+        stringList.add("a");
+        stringList.add("b");
+        stringList.add("c");
+        String string = stringList.get(0);
+        System.out.println("string = " + string);
+
+        MyLinkedListV3<Integer> intList = new MyLinkedListV3<>();
+        intList.add(1);
+        intList.add(2);
+        intList.add(3);
+        Integer integer = intList.get(0);
+        System.out.println("integer = " + integer);
+    }
+
 }
 ```
