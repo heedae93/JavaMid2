@@ -18,7 +18,7 @@ public class ComplexBox<T extends Animal> {
     public <T> T printAndReturn(T t) {
         System.out.println("animal.className: " + animal.getClass().getName());
         System.out.println("t.className: " + t.getClass().getName());
-        // t.getName(); // 호출 불가 메서드는 <T> 타입이다. <T extends Animal> 타입이 아니다.
+        // t.getName(); // 호출 불가다. 왜냐하면 메서드는 <T> 타입이다. <T extends Animal> 타입이 아니다.
         return t;
     }
 

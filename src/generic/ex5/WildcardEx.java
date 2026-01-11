@@ -1,6 +1,7 @@
 package generic.ex5;
 
 import generic.animal.Animal;
+import generic.animal.Dog;
 
 public class WildcardEx {
 
