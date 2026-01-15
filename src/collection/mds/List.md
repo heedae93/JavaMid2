@@ -1,4 +1,4 @@
-# [ 리스트 추상화 ( 인터페이스 도입 ) ]
+# [ 리스트 추상화1 ( 인터페이스 도입 ) ]
 
 - 순서가 있고 중복을 허용하는 자료구조를 List라고 한다.
 - 지금까지 만든 ArrayList와 LinkedList는 내부 구현만 다를 뿐
@@ -262,3 +262,73 @@ public class MyLinkedList<E> implements MyList<E> {
     }
 }
 ```
+
+# [ 리스트 추상화2 ( 의존 관계 주입 )]
+- 먼저 이전에 MyArrayList를 의존하는 배치 프로세스를 하나 만들어 보자.
+
+```java
+public class BatchProcessor {
+    
+    private final MyArrayList<Integer> list = new MyArrayList<>(); //코드 변경
+    
+    public void logic(int size) {
+        for (int i = 0; i < size; i++) {
+            list.add(0, i); //앞에 추가
+        }
+    }
+}
+```
+
+- 만약 위 상황에서 MyLinkedList로 변경을 해야 한다면 코드를 직접적을 수정해야 한다.
+
+```java
+public class BatchProcessor {
+    
+    private final MyLinkedList<Integer> list = new MyLinkedList<>(); //코드 변경
+    
+    public void logic(int size) {
+        for (int i = 0; i < size; i++) {
+            list.add(0, i); //앞에 추가
+        }
+    }
+}
+```
+
+- 이렇게 구현체를 직접 사용하는 것을 구체적인 클래스에 의존한다고 표현한다.
+- 이렇게 구체적인 클래스에 의존하면 변경할때 마다 BatchProcessor의 코드도 함께 수정해야 한다.
+- 이번에는 인터페이스에 의존하게 수정 해 보자.
+
+```java
+public class BatchProcessor {
+
+    private final MyList<Integer> list;
+
+    public BatchProcessor(MyList<Integer> list) {
+        this.list = list;
+    }
+
+    public void logic(int size) {
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < size; i++) {
+            list.add(0, i); //앞에 추가
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("크기: " + size + ", 계산 시간: " + (endTime - startTime) + "ms");
+    }
+
+}
+```
+- 위의 경우 처럼 인터페이스에 의존하게 되면 해당 클래스 생성 시점에 구현체를 전달해서 
+구현체 변경이 필요할시 BatchProcessor의 코드 수정 없이 생성자에 전달하는 구현체만 변경하면 된다.
+
+```java
+main() {
+    new BatchProcessor(new MyArrayList()); //MyArrayList를 사용하고 싶을 때
+    new BatchProcessor(new MyLinkedList()); //MyLinkedList를 사용하고 싶을 때
+}
+```
+
+- 이 방식을 BatchProcessor의 관점엥서 보면 실행 시점에 외부에서 구현체가 주입된다.
+- 따라서 이것을 의존관계 주입, Dependency Injection 이라 한다.
+
+# [ 리스트 추상화3 ( 컴파일 타임 의존관계 / 런타임 의존관계)]
