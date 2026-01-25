@@ -1,6 +1,7 @@
 package collection.list;
 
 import java.util.Arrays;
+import java.util.Set;
 
 public class MyArrayList<E> implements MyList<E> {
 
@@ -24,6 +25,7 @@ public class MyArrayList<E> implements MyList<E> {
 
     @Override
     public void add(E e) {
+
         if (size == elementData.length) {
             grow();
         }
