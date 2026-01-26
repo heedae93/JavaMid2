@@ -846,3 +846,227 @@ bucket.contains(Member{id='JPA'}) = true
   드시 재정의해야 한다. 
 - 해시 인덱스가 충돌할 경우 같은 해시 인덱스에 있는 데이터들을 하나하나 비교해서 찾아야한다.
 - 이때 `equals()` 를 사용해서 비교한다.
+- 먼저 hashCode()` , `equals()` 를 제대로 구현하지 않으면 어떤 문제가 발생하는지 알아보자.
+
+### hashCode, equals를 모두 구현하지 않은 경우
+
+```java
+package collection.set.member;
+
+public class MemberNoHashNoEq {
+
+    private String id;
+
+    public MemberNoHashNoEq(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "MemberNoHashNoEq{" +
+                "id='" + id + '\'' +
+                '}';
+    }
+}
+```
+- hashCode()` , `equals()` 를 재정의하지 않았다. 따라서 `Object` 의 기본 기능을 사용한다.
+- 클래스를 만들 때 `hashCode()` , `equals()` 를 재정의하지 않으면, 해시 자료 구조에서 `Object` 가 기본으로 제공하
+  는 `hashCode()` , `equals()` 를 사용하게 된다. 
+- 그런데 `Object` 가 기본으로 제공하는 기능은 단순히 인스턴스의 참조를 기반으로 작동한다.
+- 위 클래스를 사용해 보자.
+
+```java
+package collection.set.member;
+
+import collection.set.MyHashSetV2;
+
+public class HashAndEqualsMain1 {
+
+    public static void main(String[] args) {
+        //중복 등록
+        MyHashSetV2 set = new MyHashSetV2(10);
+        MemberNoHashNoEq m1 = new MemberNoHashNoEq("A");
+        MemberNoHashNoEq m2 = new MemberNoHashNoEq("A");
+        System.out.println("m1.hashCode() = " + m1.hashCode());
+        System.out.println("m2.hashCode() = " + m2.hashCode());
+        System.out.println("m1.equals(m2) = " + m1.equals(m2));
+
+        set.add(m1);
+        set.add(m2);
+        System.out.println(set);
+
+        //검색 실패
+        MemberNoHashNoEq searchValue = new MemberNoHashNoEq("A");
+        System.out.println("searchValue.hashCode() = " + searchValue.hashCode());
+        boolean contains = set.contains(searchValue);
+        System.out.println("contains = " + contains);
+    }
+}
+
+// 실행 결과
+m1.hashCode() = 1004 //인스턴스의 참조이므로 변한다.
+m2.hashCode() = 1007 //인스턴스의 참조이므로 변한다.
+m1.equals(m2) = false
+MyHashSetV2{buckets=[[MemberNoHashNoEq{id='A'}], [], [], [],
+[MemberNoHashNoEq{id='A'}], [], [], [], [], []], size=2, capacity=10}
+searchValue.hashCode() = 1008
+contains = false
+```
+- m1.hashCode()` , `m2.hashCode()` 는 `Object` 의 기본 기능을 사용하기 때문에 객체의 참조값을 기반으로 해시
+코드를 생성한다. 
+- 따라서 실행할 때 마다 값이 달라질 수 있다. 여기서는 `m1=1004` , `m2=1007` 이라고 가정하겠다.
+- `m1` 과 `m2` 는 인스턴스는 다르지만 둘다 "A"라는 같은 회원 `id` 를 가지고 있다. 따라서 **논리적으로 같은 회원**으로 보아야 한다.
+- 하지만 이경우 아래의 2가지 문제가 발생한다.
+---
+- 데이터 저장 문제
+
+![img_11.png](img_11.png)
+
+- `m1` 과 `m2` 의 해시 코드가 서로 다르기 때문에 다른 위치에 각각 저장된다.
+- 회원 id가 "A"로 같은 회원의 데이터가 데이터가 중복 저장된다.
+---
+- 데이터 검색 문제
+![img_12.png](img_12.png)
+
+- `MemberNoHashNoEq searchValue = new MemberNoHashNoEq("A")`
+  
+- 회원 id가 "A"인 객체를 검색하기 위해 회원 id가 "A"인 객체를 만들었다. 
+- 이 객체의 참조값은 `1008` 이라 가정하자. 데이터를 검색할 때 `searchValue` 객체의 해시 코드는 `1008` 이다. 
+- 따라서 다른 위치에서 데이터를 찾게 되고, 검색에 실패한다.
+
+### hashCode는 구현했지만 equals를 구현하지 않은 경우
+- 이번에는 `hashCode()` 만 재정의하고, `equals()` 는 재정의하지 않으면 어떤 문제가 발생하는 알아보자.
+
+```java
+package collection.set.member;
+
+import java.util.Objects;
+
+public class MemberOnlyHash {
+
+    private String id;
+
+    public MemberOnlyHash(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "MemberOnlyHash{" +
+                "id='" + id + '\'' +
+                '}';
+    }
+}
+```
+- Objects.hash(id)` 를 사용해서 `id` 를 기준으로 해시 코드를 생성했다.
+- 위 코드를 사용해 보자.
+
+```java
+package collection.set.member;
+
+import collection.set.MyHashSetV2;
+
+public class HashAndEqualsMain2 {
+
+    public static void main(String[] args) {
+        //중복 등록
+        MyHashSetV2 set = new MyHashSetV2(10);
+        MemberOnlyHash m1 = new MemberOnlyHash("A");
+        MemberOnlyHash m2 = new MemberOnlyHash("A");
+        System.out.println("m1.hashCode() = " + m1.hashCode());
+        System.out.println("m2.hashCode() = " + m2.hashCode());
+        System.out.println("m1.equals(m2) = " + m1.equals(m2));
+
+        set.add(m1);
+        set.add(m2);
+        System.out.println(set);
+
+        //검색 실패
+        MemberOnlyHash searchValue = new MemberOnlyHash("A");
+        System.out.println("searchValue.hashCode() = " + searchValue.hashCode());
+        boolean contains = set.contains(searchValue);
+        System.out.println("contains = " + contains);
+    }
+}
+
+// 출력 결과
+m1.hashCode() = 96
+m2.hashCode() = 96
+m1.equals(m2) = false
+MyHashSetV2{buckets=[[], [], [], [], [], [], [MemberOnlyHash{id='A'}, MemberOnlyHash{id='A'}], [], [], []], size=2, capacity=10}
+searchValue.hashCode() = 96
+contains = false
+```
+
+- 위 경우도 2가지 문제가 발생한다.
+---
+- 데이터 저장 문제
+
+![img_13.png](img_13.png)
+
+- hashCode()` 를 재정의했기 때문에 같은 `id` 를 사용하는 `m1` , `m2` 는 같은 해시 코드를 사용한다.
+- 따라서 같은 해시 인덱스에 데이터가 저장된다.
+- 그런데 `add()` 로직은 중복 데이터를 체크하기 때문에 같은 데이터가 저장되면 안된다.
+
+```java
+public boolean add(Object value) {
+  int hashIndex = hashIndex(value);
+  LinkedList<Object> bucket = buckets[hashIndex];
+  //중복 체크 로직
+  if (bucket.contains(value)) {
+    return false;
+  }
+  
+  bucket.add(value);
+  size++;
+  
+  return true;
+}
+```
+
+- bucket.contains()` 내부에서 데이터를 순차 비교할 때 `equals()` 를 사용한다.
+- 그런데 `MemberOnlyHash` 는 `equals()` 를 재정의하지 않았으므로 `Object` 의 `equals()` 를 상속 받아서
+사용한다. 
+- 따라서 인스턴스의 참조값을 비교한다. 
+- 인스턴스가 서로 다른 `m1` , `m2` 는 비교에 실패한다.
+- `add()` 로직은 중복 데이터가 없다고 생각하고 `m1` , `m2` 를 모두 저장한다.
+- 결과적으로 같은 회원 `id` 를 가진 중복 데이터가 저장된다.
+
+----
+
+- 데이터 검색 문제
+
+![img_14.png](img_14.png)
+
+- MemberOnlyHash searchValue = new MemberOnlyHash("A")`
+회원 id가 "A"인 객체를 검색하기 위해 회원 id가 "A"인 객체를 만들었다. 
+- 해시 코드가 구현되어 있다.
+- `searchValue` 는 해시 인덱스 6을 정확히 찾을 수 있다.
+- 해시 인덱스에 있는 모든 데이터를 `equals()` 를 통해 비교해서 같은 값을 찾아야 한다.
+- 다음 코드를 보자. `bucket.contains(searchValue)` 내부에서 연결 리스트에 있는 모든 항목을 `searchValue` 와 `equals()` 로 비교한다.
+
+```java
+public boolean contains(Object searchValue) {
+    int hashIndex = hashIndex(searchValue);
+    LinkedList<Object> bucket = buckets[hashIndex];
+    return bucket.contains(searchValue);
+}
+
+```
+
+- MemberOnlyHash` 는 `equals()` 를 재정의하지 않았으므로 `Object` 의 `equals()` 를 상속 받아서 사용한다. 
+- 따라서 인스턴스의 참조값을 비교한다. 인스턴스가 서로 다른 `searchValue` 와 `m1` , `m2` 는 비교에 실패한다.
+- 결과적으로 데이터를 찾을 수 없다.
