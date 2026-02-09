@@ -846,6 +846,9 @@ bucket.contains(Member{id='JPA'}) = true
   드시 재정의해야 한다. 
 - 해시 인덱스가 충돌할 경우 같은 해시 인덱스에 있는 데이터들을 하나하나 비교해서 찾아야한다.
 - 이때 `equals()` 를 사용해서 비교한다.
+- 예를들어 hi와 jpa의 해시 인덱스가 모두 0으로 계산되는데 만약 hi만 저장한 상태에서 나중에 jpa을 조회를 하면
+0번 인덱스로 가서 hi를 리턴하게 되는 오류가 발생하기 때문이다. 
+- 따라서 반드시 equals를 구현해야 하는 것이다.
 - 먼저 hashCode()` , `equals()` 를 제대로 구현하지 않으면 어떤 문제가 발생하는지 알아보자.
 
 ### hashCode, equals를 모두 구현하지 않은 경우
@@ -1070,3 +1073,170 @@ public boolean contains(Object searchValue) {
 - MemberOnlyHash` 는 `equals()` 를 재정의하지 않았으므로 `Object` 의 `equals()` 를 상속 받아서 사용한다. 
 - 따라서 인스턴스의 참조값을 비교한다. 인스턴스가 서로 다른 `searchValue` 와 `m1` , `m2` 는 비교에 실패한다.
 - 결과적으로 데이터를 찾을 수 없다.
+
+### hashCode와 equals를 모두 구현한 경우
+- 이번에는 `hashCode()` 와 `equals()` 모두 재정의한 경우를 살펴보자. 기존에 작성한 `Member` 클래스를 활용하자.
+
+```java
+public class HashAndEqualsMain3 {
+
+    public static void main(String[] args) {
+        //중복 등록 안됨
+        MyHashSetV2 set = new MyHashSetV2(10);
+        Member m1 = new Member("A");
+        Member m2 = new Member("A");
+        System.out.println("m1.hashCode() = " + m1.hashCode());
+        System.out.println("m2.hashCode() = " + m2.hashCode());
+        System.out.println("m1.equals(m2) = " + m1.equals(m2));
+
+        set.add(m1);
+        set.add(m2);
+        System.out.println(set);
+
+        //검색 성공
+        Member searchValue = new Member("A");
+        System.out.println("searchValue.hashCode() = " + searchValue.hashCode());
+        boolean contains = set.contains(searchValue);
+        System.out.println("contains = " + contains);
+    }
+}
+
+// 실행 결과
+m1.hashCode() = 96
+m2.hashCode() = 96
+m1.equals(m2) = true
+MyHashSetV2{buckets=[[], [], [], [], [], [], [Member{id='A'}], [], [], []], size=1, capacity=10}
+searchValue.hashCode() = 96
+contains = true
+```
+
+---
+- 데이터 저장
+
+![img_15.png](img_15.png)
+
+- 처음에 `m1` 을 저장한다.
+- 다음으로 `m2` 저장을 시도한다. 
+- `m1` 과 같은 해시 코드를 사용하므로 해시 인덱스도 같다.
+- 여기서 중복 데이터를 저장하면 안되므로 `m1` 과 `m2` 를 `equals` 비교한다. 
+- 같은 데이터가 이미 있으므로 `m2` 는 저장에 실패한다. 
+- 결과적으로 중복 데이터가 저장되지 않는다.
+
+--- 
+- 데이터 검색
+
+![img_16.png](img_16.png)
+
+- searchValue` 의 해시 코드로 6번 해시 인덱스를 찾는다.
+- `searchValue` 와 6번 해시 인덱스 내부의 데이터를 모두 `equals` 비교한다. 
+- `searchValue` 와 `m1` 이 `equals` 비교에 성공하므로 참을 반환한다.
+
+### 정리
+- hashCode()` 를 항상 재정의해야 하는 것은 아니다. 하지만 해시 자료 구조를 사용하는 경우 `hashCode()` 와
+`equals()` 를 반드시 함께 재정의해야 한다. 물론 직접 재정의하는 것은 쉽지 않으므로 IDE의 도움을 받자.
+
+# 제네릭과 인터페이스 도입
+- 지금까지 만든 HashSet에 제네릭을 도입해서 타입 안정성을 높여보자.
+- 먼저 핵심 기능을 인터페이스로 뽑아 보자 이렇게 하면 해당 인터페이스를 구현해서 해시 기반이 아닌
+다른 자료 구조 기반의 Set도 만들 수 있다.
+
+```java
+package collection.set;
+
+public interface MySet<E> {
+  boolean add(E element);
+  boolean remove(E value);
+  boolean contains(E value);
+}
+```
+- 위 인터페이스를 구현해 보자.
+- 이전 코드에서 `Object` 로 다루던 부분들을 제네릭의 타입 매개변수 `E` 로 변경한다.
+
+```java
+package collection.set;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+
+public class MyHashSetV3<E> implements MySet<E> {
+
+    static final int DEFAULT_INITIAL_CAPACITY = 16;
+
+    private LinkedList<E>[] buckets;
+
+    private int size = 0;
+    private int capacity = DEFAULT_INITIAL_CAPACITY;
+
+    public MyHashSetV3() {
+        initBuckets();
+    }
+
+    public MyHashSetV3(int capacity) {
+        this.capacity = capacity;
+        initBuckets();
+    }
+
+    private void initBuckets() {
+        buckets = new LinkedList[capacity];
+        for (int i = 0; i < capacity; i++) {
+            buckets[i] = new LinkedList<>();
+        }
+    }
+
+    @Override
+    public boolean add(E value) {
+        int hashIndex = hashIndex(value);
+        LinkedList<E> bucket = buckets[hashIndex];
+        if (bucket.contains(value)) {
+            return false;
+        }
+
+        bucket.add(value);
+        size++;
+        return true;
+    }
+
+    @Override
+    public boolean contains(E searchValue) {
+        int hashIndex = hashIndex(searchValue);
+        LinkedList<E> bucket = buckets[hashIndex];
+        return bucket.contains(searchValue);
+    }
+
+    @Override
+    public boolean remove(E value) {
+        int hashIndex = hashIndex(value);
+        LinkedList<E> bucket = buckets[hashIndex];
+        boolean result = bucket.remove(value);
+        if (result) {
+            size--;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private int hashIndex(Object value) {
+        //hashCode의 결과로 음수가 나올 수 있다. abs()를 사용해서 마이너스를 제거한다.
+        return Math.abs(value.hashCode()) % capacity;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    @Override
+    public String toString() {
+        return "MyHashSetV3{" +
+                "buckets=" + Arrays.toString(buckets) +
+                ", size=" + size +
+                ", capacity=" + capacity +
+                '}';
+    }
+}
+
+// 실행 결과
+MyHashSetV3{buckets=[[], [], [], [], [], [A], [B], [C], [], []], size=3, capacity=10}
+bucket.contains(A) = true
+```
+- 제네릭의 덕분에 타입 안전성이 높은 자료 구조를 만들 수 있게 되었다.
